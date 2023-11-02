@@ -17,7 +17,11 @@ popd
 
 VERSION="${PYTHON_VERSION:-3.12.0}"
 curl -O https://www.python.org/ftp/python/$VERSION/Python-$VERSION.tar.xz && tar xf Python-$VERSION.tar.xz && pushd Python-$VERSION
-./configure --enable-optimizations --prefix=$INSTALL_PATH --with-openssl=$INSTALL_PATH --with-openssl-rpath=auto
+# https://docs.python.org/3/using/configure.html#cmdoption-without-static-libpython
+# Sort versions https://stackoverflow.com/a/4024263
+[ "3.10.0" = "`echo $PYTHON_VERSION 3.10.0 | xargs -n1 | sort -V | head -n1`" ] && \
+    WO_STATIC="--without-static-libpython"
+./configure --enable-optimizations $WO_STATIC --prefix=$INSTALL_PATH --with-openssl=$INSTALL_PATH --with-openssl-rpath=auto
 make
 make altinstall
 popd
