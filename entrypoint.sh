@@ -26,4 +26,6 @@ make
 make altinstall
 popd
 
+# https://www.cyberciti.biz/faq/how-to-find-and-delete-directory-recursively-on-linux-or-unix-like-system/
+find $INSTALL_PATH -type d -name __pycache__ -exec rm -rf {} +
 tar cfz output/python_${PYTHON_VERSION}_centos7.tar.gz $INSTALL_PATH
