@@ -12,7 +12,7 @@ cd ~/build
 
 OPENSSL_VERSION="${OPENSSL_VERSION:-1.1.1w}"
 curl -O https://ftp.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz && tar xzf openssl-$OPENSSL_VERSION.tar.gz && pushd openssl-$OPENSSL_VERSION
-./config --prefix=$INSTALL_PATH && make && make install
+./config --prefix=$INSTALL_PATH && make && make install_sw  # install w/o docs https://stackoverflow.com/q/47136654
 popd
 
 VERSION="${PYTHON_VERSION:-3.12.0}"
