@@ -1,9 +1,6 @@
 services:
   builder:
     build: .
-    environment:
-      # PYTHON_VERSION: 3.12.0
-      # OPENSSL_VERSION: 1.1.1w
-      INSTALL_PATH: /home/user/.local
+    env_file: .env
     volumes:
       - ./output:/root/build/output
