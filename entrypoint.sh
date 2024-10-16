@@ -26,7 +26,9 @@ else
     [ "3.0.0" = "`echo $OPENSSL_VERSION 3.0.0 | xargs -n1 | sort -V | head -n1`" ] && \
         OPENSSL_URL=https://github.com/openssl/openssl/releases/download/openssl-$OPENSSL_VERSION/openssl-$OPENSSL_VERSION.tar.gz
     curl -LO $OPENSSL_URL && tar xzf openssl-$OPENSSL_VERSION.tar.gz && pushd openssl-$OPENSSL_VERSION
-    ./config --prefix=$SSL_INSTALL_PATH && make && make install_sw  # install w/o docs https://stackoverflow.com/q/47136654
+    ./config --prefix=$SSL_INSTALL_PATH
+    make -j8
+    make install_sw  # install w/o docs https://stackoverflow.com/q/47136654
     popd
     # Save to .cache folder
     mkdir -p output/.cache/$INSTALL_PATH_HASH
@@ -41,7 +43,7 @@ if [ -n "$SQLITE_VERSION" ]; then
         curl -LOJ https://github.com/sqlite/sqlite/archive/refs/tags/version-$SQLITE_VERSION.tar.gz
         tar xzf sqlite-version-$SQLITE_VERSION.tar.gz && pushd sqlite-version-$SQLITE_VERSION
         ./configure --prefix=$SQLITE_INSTALL_PATH
-        make
+        make -j8
         make install
         popd
         # Save to .cache folder
@@ -49,7 +51,7 @@ if [ -n "$SQLITE_VERSION" ]; then
         tar cfz output/.cache/$INSTALL_PATH_HASH/sqlite-$SQLITE_VERSION.tar.gz $SQLITE_INSTALL_PATH
     fi
 elif [ "3.13.0" = "`echo $VERSION 3.13.0 | xargs -n1 | sort -V | head -n1`" ]; then
-    echo "Error: building SQLite is required for CPython 3.13+" >&2
+    echo "Error: building SQLite is required for CPython 3.13+ on CentOS 7" >&2
     exit 1
 fi
 
@@ -87,7 +89,7 @@ PKG_CONFIG_PATH=$SSL_INSTALL_PATH/$LIB_SSL/pkgconfig
 
 ./configure --enable-optimizations $NO_STATICLIB $NO_TESTMOD --prefix=$INSTALL_PATH \
             $NO_GIL LDFLAGS=-Wl,-rpath=$RPATH PKG_CONFIG_PATH=$PKG_CONFIG_PATH
-make
+make -j8
 make altinstall
 popd
 
