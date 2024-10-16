@@ -16,6 +16,9 @@ RUN yum install -y bzip2-devel gdbm-devel krb5-devel libcom_err-devel \
 RUN yum install -y rh-perl530-perl-Text-Template rh-perl530-perl-IPC-Cmd \
                    rh-perl530-perl-Data-Dumper rh-perl530-perl-Pod-Html
 
+# Tcl is required to build SQLite https://sqlite.org/forum/forumpost/4380363682708ece
+RUN yum install -y tcl
+
 COPY entrypoint.sh /usr/bin/entrypoint.sh
 RUN chmod +x /usr/bin/entrypoint.sh
 ENTRYPOINT [ "/usr/bin/entrypoint.sh" ]
