@@ -42,7 +42,8 @@ if [ -n "$SQLITE_VERSION" ]; then
     else
         curl -LOJ https://github.com/sqlite/sqlite/archive/refs/tags/version-$SQLITE_VERSION.tar.gz
         tar xzf sqlite-version-$SQLITE_VERSION.tar.gz && pushd sqlite-version-$SQLITE_VERSION
-        ./configure --prefix=$SQLITE_INSTALL_PATH
+        # FTS4 is required to pass Python PGO tests. SQLite 3.9+ supports --enable-fts* options.
+        ./configure --prefix=$SQLITE_INSTALL_PATH --enable-fts3 --enable-fts4
         make -j8
         make install
         popd
@@ -58,7 +59,8 @@ fi
 curl -O https://www.python.org/ftp/python/$VERSION/Python-$VERSION.tar.xz && tar xf Python-$VERSION.tar.xz && pushd Python-$VERSION
 # https://docs.python.org/3/using/configure.html#cmdoption-without-static-libpython
 ./configure --help | grep -q -e --without-static-libpython && NO_STATICLIB="--without-static-libpython"
-./configure --help | grep -q -e --disable-test-modules && NO_TESTMOD="--disable-test-modules"
+# W/o test modules some Python PGO tests may fail https://github.com/python/cpython/issues/89831
+# ./configure --help | grep -q -e --disable-test-modules && NO_TESTMOD="--disable-test-modules"
 if [ -n "$NO_GIL" ]; then
     if ! ./configure --help | grep -q -e --disable-gil; then
         echo "Error: --disable-gil option not found" >&2
@@ -87,7 +89,8 @@ RPATH=$SSL_INSTALL_PATH/$LIB_SSL
 PKG_CONFIG_PATH=$SSL_INSTALL_PATH/$LIB_SSL/pkgconfig
 [ -n "$SQLITE_VERSION" ] && PKG_CONFIG_PATH+=:$SQLITE_INSTALL_PATH/lib/pkgconfig
 
-./configure --enable-optimizations $NO_STATICLIB $NO_TESTMOD --prefix=$INSTALL_PATH \
+./configure --enable-optimizations --enable-loadable-sqlite-extensions \
+            $NO_STATICLIB $NO_TESTMOD --prefix=$INSTALL_PATH \
             $NO_GIL LDFLAGS=-Wl,-rpath=$RPATH PKG_CONFIG_PATH=$PKG_CONFIG_PATH
 make -j8
 make altinstall
@@ -97,4 +100,5 @@ popd
 find $INSTALL_PATH -type d -name __pycache__ -exec rm -rf {} +
 find $INSTALL_PATH -type d -name include -exec rm -rf {} +
 find $INSTALL_PATH -name "*.a" -type f -delete
+find $INSTALL_PATH/lib -type d -name test -exec rm -rf {} +  # remove Python test modules
 tar cfz output/python${NO_GIL+t}_${PYTHON_VERSION}_centos7_ssl$OPENSSL_VERSION.tar.gz $INSTALL_PATH
