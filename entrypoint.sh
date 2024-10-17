@@ -89,7 +89,7 @@ RPATH=$SSL_INSTALL_PATH/$LIB_SSL
 PKG_CONFIG_PATH=$SSL_INSTALL_PATH/$LIB_SSL/pkgconfig
 [ -n "$SQLITE_VERSION" ] && PKG_CONFIG_PATH+=:$SQLITE_INSTALL_PATH/lib/pkgconfig
 
-./configure --enable-optimizations --enable-loadable-sqlite-extensions \
+./configure --enable-optimizations --with-lto --enable-loadable-sqlite-extensions \
             $NO_STATICLIB $NO_TESTMOD --prefix=$INSTALL_PATH \
             $NO_GIL LDFLAGS=-Wl,-rpath=$RPATH PKG_CONFIG_PATH=$PKG_CONFIG_PATH
 make -j8
@@ -99,6 +99,6 @@ popd
 # https://www.cyberciti.biz/faq/how-to-find-and-delete-directory-recursively-on-linux-or-unix-like-system/
 find $INSTALL_PATH -type d -name __pycache__ -exec rm -rf {} +
 find $INSTALL_PATH -type d -name include -exec rm -rf {} +
+find $INSTALL_PATH -type d -name test -exec rm -rf {} +  # remove Python test modules
 find $INSTALL_PATH -name "*.a" -type f -delete
-find $INSTALL_PATH/lib -type d -name test -exec rm -rf {} +  # remove Python test modules
 tar cfz output/python${NO_GIL+t}_${PYTHON_VERSION}_centos7_ssl$OPENSSL_VERSION.tar.gz $INSTALL_PATH
